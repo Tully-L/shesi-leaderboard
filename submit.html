@@ -218,18 +218,18 @@
     const btn = document.getElementById('submitBtn');
     const charHint = document.getElementById('charHint');
     const tagHint = document.getElementById('tagHint');
-    const ready = text.length > 20 && selectedTag;
+    const ready = text.length >= 5 && selectedTag;
     btn.disabled = !ready;
     // 字数提示
     if (text.length === 0) {
       charHint.textContent = '';
-    } else if (text.length <= 20) {
-      charHint.textContent = `还差 ${21 - text.length} 字才能发布`;
+    } else if (text.length < 5) {
+      charHint.textContent = `还差 ${5 - text.length} 字才能发布`;
     } else {
       charHint.textContent = '';
     }
     // 分类提示（只在字数够了但没选分类时显示）
-    tagHint.style.display = (text.length > 20 && !selectedTag) ? 'inline' : 'none';
+    tagHint.style.display = (text.length >= 5 && !selectedTag) ? 'inline' : 'none';
   }
 
   function onInput() {
