@@ -54,6 +54,16 @@
     .actions { display: flex; align-items: center; gap: 12px; }
     .action-item { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #9CA3AF; }
 
+    /* 名人堂 hall card */
+    .card-hall { background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border: 1.5px solid #FDE68A; }
+    .card-hall .death-num { font-family: 'Bricolage Grotesque', sans-serif; font-size: 20px; font-weight: 800; }
+    .hall-score-big { font-family: 'Bricolage Grotesque', sans-serif; font-size: 40px; font-weight: 800; color: #E11D48; line-height: 1; }
+    .hall-score-row { display: flex; align-items: center; gap: 16px; padding: 4px 0; }
+
+    /* 最新 new card */
+    .card-new { border-left: 3px solid #3B82F6; }
+    .new-time-badge { background: #EFF6FF; color: #3B82F6; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 99px; white-space: nowrap; }
+
     /* Skeleton */
     .skeleton { background: #FFFFFF; border-radius: 20px; padding: 16px; height: 140px; animation: pulse 1.4s ease-in-out infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
@@ -106,6 +116,85 @@
   function rankClass(n) { return n <= 3 ? `rank-${n}` : 'rank-n'; }
   function rankLabel(n) { return n === 1 ? '🏆 #1' : n === 2 ? '🥈 #2' : n === 3 ? '🥉 #3' : `#${n}`; }
 
+  function cardHot(p, i) {
+    return `
+      <a class="card" href="detail.html?id=${p.id}">
+        <div class="card-head">
+          <div class="user-row">
+            <div class="avatar" style="background:${avatarBg(p.authorId)}">${p.anonymous ? '🕶️' : avatarEmoji(p.authorId)}</div>
+            <div class="user-info">
+              <div class="username">${p.anonymous ? '匿名用户' : '社死选手'}</div>
+              <div class="user-meta"><span>${timeAgo(p.createdAt)}</span>${p.tag ? `<span class="tag-pill">${p.tag}</span>` : ''}</div>
+            </div>
+          </div>
+          <div class="rank-badge ${rankClass(i+1)}">${rankLabel(i+1)}</div>
+        </div>
+        <div class="story-text">${escHtml(p.content)}</div>
+        <div class="card-footer">
+          <div class="death-score"><span style="font-size:15px">💀</span><span class="death-num">社死指数 ${p.deathIndex}/100</span></div>
+          <div class="actions">
+            <div class="action-item"><span style="font-size:14px">${isLiked(p.id) ? '❤️' : '😂'}</span><span>${formatNum(p.likes)}</span></div>
+            <div class="action-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg><span>${formatNum(p.commentCount || 0)}</span></div>
+          </div>
+        </div>
+      </a>`;
+  }
+
+  function cardNew(p) {
+    const mins = Math.floor((Date.now() - p.createdAt) / 60000);
+    const isRecent = mins < 60;
+    return `
+      <a class="card card-new" href="detail.html?id=${p.id}">
+        <div class="card-head">
+          <div class="user-row">
+            <div class="avatar" style="background:${avatarBg(p.authorId)}">${p.anonymous ? '🕶️' : avatarEmoji(p.authorId)}</div>
+            <div class="user-info">
+              <div class="username">${p.anonymous ? '匿名用户' : '社死选手'}</div>
+              <div class="user-meta">${p.tag ? `<span class="tag-pill">${p.tag}</span>` : ''}</div>
+            </div>
+          </div>
+          <span class="new-time-badge">${isRecent ? '🕐 ' + timeAgo(p.createdAt) : timeAgo(p.createdAt)}</span>
+        </div>
+        <div class="story-text">${escHtml(p.content)}</div>
+        <div class="card-footer">
+          <div class="death-score"><span style="font-size:15px">💀</span><span class="death-num">社死指数 ${p.deathIndex}/100</span></div>
+          <div class="actions">
+            <div class="action-item"><span style="font-size:14px">${isLiked(p.id) ? '❤️' : '😂'}</span><span>${formatNum(p.likes)}</span></div>
+          </div>
+        </div>
+      </a>`;
+  }
+
+  function cardHall(p, i) {
+    const medals = ['🏆','🥈','🥉'];
+    return `
+      <a class="card card-hall" href="detail.html?id=${p.id}">
+        <div class="card-head">
+          <div class="user-row">
+            <div class="avatar" style="background:${avatarBg(p.authorId)}">${p.anonymous ? '🕶️' : avatarEmoji(p.authorId)}</div>
+            <div class="user-info">
+              <div class="username">${p.anonymous ? '匿名用户' : '社死选手'}</div>
+              <div class="user-meta">${p.tag ? `<span class="tag-pill">${p.tag}</span>` : ''}</div>
+            </div>
+          </div>
+          <div class="rank-badge ${rankClass(i+1)}">${i < 3 ? medals[i] + ' ' : ''}${rankLabel(i+1)}</div>
+        </div>
+        <div class="hall-score-row">
+          <div class="hall-score-big">${p.deathIndex}</div>
+          <div>
+            <div style="font-size:11px;color:#9CA3AF">社死指数</div>
+            <div style="font-size:13px;font-weight:700;color:#D97706">${p.deathLevel}</div>
+            <div style="font-size:11px;color:#9CA3AF;margin-top:2px">${p.deathReason || ''}</div>
+          </div>
+        </div>
+        <div class="story-text" style="-webkit-line-clamp:2;line-clamp:2">${escHtml(p.content)}</div>
+        <div class="card-footer">
+          <div class="action-item"><span style="font-size:14px">${isLiked(p.id) ? '❤️' : '😂'}</span><span>${formatNum(p.likes)}</span></div>
+          <div class="action-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg><span>${formatNum(p.commentCount || 0)}</span></div>
+        </div>
+      </a>`;
+  }
+
   async function renderList(sort) {
     const list = document.getElementById('list');
     list.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
@@ -114,40 +203,9 @@
       list.innerHTML = `<div class="empty"><div class="emoji">😶</div><p>还没有社死故事<br>快来第一个投稿！</p></div>`;
       return;
     }
-    list.innerHTML = posts.map((p, i) => `
-      <a class="card" href="detail.html?id=${p.id}">
-        <div class="card-head">
-          <div class="user-row">
-            <div class="avatar" style="background:${avatarBg(p.authorId)}">${p.anonymous ? '🕶️' : avatarEmoji(p.authorId)}</div>
-            <div class="user-info">
-              <div class="username">${p.anonymous ? '匿名用户' : '社死选手'}</div>
-              <div class="user-meta">
-                <span>${timeAgo(p.createdAt)}</span>
-                ${p.tag ? `<span class="tag-pill">${p.tag}</span>` : ''}
-              </div>
-            </div>
-          </div>
-          <div class="rank-badge ${rankClass(i+1)}">${rankLabel(i+1)}</div>
-        </div>
-        <div class="story-text">${escHtml(p.content)}</div>
-        <div class="card-footer">
-          <div class="death-score">
-            <span style="font-size:15px">💀</span>
-            <span class="death-num">社死指数 ${p.deathIndex}/100</span>
-          </div>
-          <div class="actions">
-            <div class="action-item">
-              <span style="font-size:14px">${isLiked(p.id) ? '❤️' : '😂'}</span>
-              <span>${formatNum(p.likes)}</span>
-            </div>
-            <div class="action-item">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-              <span>${formatNum(p.commentCount || 0)}</span>
-            </div>
-          </div>
-        </div>
-      </a>
-    `).join('');
+    if (sort === 'hall') list.innerHTML = posts.map((p, i) => cardHall(p, i)).join('');
+    else if (sort === 'new') list.innerHTML = posts.map(p => cardNew(p)).join('');
+    else list.innerHTML = posts.map((p, i) => cardHot(p, i)).join('');
   }
 
   let currentSort = 'hot';

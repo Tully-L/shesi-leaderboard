@@ -65,11 +65,11 @@
     .submit-btn:not(:disabled):active { opacity: 0.85; }
     .disclaimer { text-align: center; font-size: 11px; color: #9CA3AF; }
 
-    /* Location sheet */
-    .sheet-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+    /* Location modal (centered) */
+    .sheet-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; opacity: 0; transition: opacity 0.2s; pointer-events: none; display: flex; align-items: center; justify-content: center; }
     .sheet-mask.show { opacity: 1; pointer-events: auto; }
-    .sheet { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 100%; max-width: 402px; background: #FFFFFF; border-radius: 20px 20px 0 0; padding: 16px 16px env(safe-area-inset-bottom, 20px); z-index: 101; transition: transform 0.25s cubic-bezier(0.32,0.72,0,1); }
-    .sheet.show { transform: translateX(-50%) translateY(0); }
+    .sheet { background: #FFFFFF; border-radius: 20px; padding: 20px; width: calc(100% - 48px); max-width: 354px; z-index: 101; transform: scale(0.92); opacity: 0; transition: transform 0.22s cubic-bezier(0.32,0.72,0,1), opacity 0.22s; pointer-events: none; }
+    .sheet-mask.show .sheet { transform: scale(1); opacity: 1; pointer-events: auto; }
     .sheet-title { font-size: 15px; font-weight: 700; color: #1A1A1A; text-align: center; margin-bottom: 16px; }
     .city-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
     .city-btn { height: 44px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F9FAFB; color: #374151; font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: all 0.15s; }
@@ -155,11 +155,12 @@
     <div class="disclaimer">发布即表示同意《社区规范》，请勿发布虚假或侵权内容</div>
   </div>
 
-  <!-- Location sheet -->
-  <div class="sheet-mask" id="sheetMask" onclick="closeSheet()"></div>
-  <div class="sheet" id="locationSheet">
-    <div class="sheet-title">📍 选择地点</div>
-    <div class="city-grid" id="cityGrid"></div>
+  <!-- Location modal -->
+  <div class="sheet-mask" id="sheetMask" onclick="closeSheet()">
+    <div class="sheet" id="locationSheet" onclick="event.stopPropagation()">
+      <div class="sheet-title">📍 选择地点</div>
+      <div class="city-grid" id="cityGrid"></div>
+    </div>
   </div>
 </div>
 

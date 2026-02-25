@@ -105,9 +105,9 @@
 
   async function load() {
     if (!postId) { location.href = 'index.html'; return; }
-    currentPost = await DB.getPost(postId);
-    if (!currentPost) { location.href = 'index.html'; return; }
-    const comments = await DB.getComments(postId);
+    const [post, comments] = await Promise.all([DB.getPost(postId), DB.getComments(postId)]);
+    if (!post) { location.href = 'index.html'; return; }
+    currentPost = post;
     render(currentPost, comments);
   }
 
