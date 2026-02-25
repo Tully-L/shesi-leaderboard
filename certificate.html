@@ -9,157 +9,187 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body { background: #0F0F0F; font-family: 'DM Sans', -apple-system, sans-serif; color: #FFFFFF; }
-    .app { max-width: 402px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+    .app { max-width: 402px; margin: 0 auto; min-height: 100svh; display: flex; flex-direction: column; }
 
     .header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
-    .header-icon { color: #FFFFFF; cursor: pointer; background: none; border: none; display: flex; align-items: center; }
-    .header-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 18px; font-weight: 700; color: #FFFFFF; }
+    .icon-btn { width: 36px; height: 36px; border-radius: 18px; background: #1F1F1F; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+    .header-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 17px; font-weight: 700; color: #FFFFFF; }
 
-    .content { padding: 24px; display: flex; flex-direction: column; gap: 24px; align-items: center; flex: 1; padding-bottom: 130px; }
+    .scroll-area { flex: 1; overflow-y: auto; padding: 8px 20px 140px; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+
+    /* No posts state */
+    .no-posts { text-align: center; padding: 60px 24px; }
+    .no-posts .emoji { font-size: 56px; margin-bottom: 16px; }
+    .no-posts h2 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .no-posts p { font-size: 14px; color: #6B7280; line-height: 1.6; }
+    .go-submit { margin-top: 20px; display: inline-block; background: #E11D48; color: #FFF; padding: 12px 28px; border-radius: 24px; font-size: 15px; font-weight: 600; text-decoration: none; }
 
     /* Certificate card */
     .cert-card {
       width: 100%;
-      background: linear-gradient(180deg, #1F1F1F 0%, #2D2D2D 100%);
+      background: linear-gradient(160deg, #1F1F1F 0%, #2A2A2A 100%);
       border-radius: 24px;
-      padding: 32px 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      border: 2px solid rgba(225,29,72,0.25);
+      border: 1.5px solid rgba(225,29,72,0.3);
+      overflow: hidden;
     }
-
-    /* Badge circle */
+    .cert-inner { padding: 32px 24px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
     .cert-badge {
-      width: 120px;
-      height: 120px;
-      border-radius: 60px;
-      background: radial-gradient(circle, #E11D48 0%, #BE123C 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 56px;
+      width: 110px; height: 110px; border-radius: 55px;
+      background: radial-gradient(circle at 35% 35%, #E11D48 0%, #BE123C 100%);
+      display: flex; align-items: center; justify-content: center; font-size: 52px;
+      box-shadow: 0 8px 32px rgba(225,29,72,0.4);
     }
+    .cert-level { font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; font-weight: 800; color: #E11D48; text-align: center; }
+    .cert-name { font-size: 17px; color: #FFFFFF; opacity: 0.85; }
+    .cert-divider { width: 180px; height: 1px; background: #333; }
+    .stats-row { display: flex; gap: 0; width: 100%; justify-content: center; }
+    .stat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0; }
+    .stat + .stat { border-left: 1px solid #2A2A2A; }
+    .stat-val { font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 800; }
+    .stat-lab { font-size: 10px; color: #6B7280; text-align: center; line-height: 1.3; }
+    .cert-quote { background: #252525; border-radius: 12px; padding: 14px 18px; width: 100%; }
+    .quote-label { font-size: 11px; color: #6B7280; margin-bottom: 6px; }
+    .quote-text { font-size: 14px; color: #FFFFFF; line-height: 1.5; }
+    .quote-meta { font-size: 11px; color: #6B7280; margin-top: 6px; }
+    .cert-date { font-size: 11px; color: #4B5563; }
 
-    .cert-level {
-      font-family: 'Bricolage Grotesque', sans-serif;
-      font-size: 28px;
-      font-weight: 800;
-      color: #E11D48;
-      text-align: center;
-    }
-
-    .cert-name {
-      font-size: 18px;
-      color: #FFFFFF;
-      text-align: center;
-    }
-
-    .cert-divider { width: 200px; height: 1px; background: #333333; }
-
-    .cert-stats { display: flex; gap: 16px; justify-content: center; width: 100%; }
-    .stat-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .stat-val { font-family: 'Bricolage Grotesque', sans-serif; font-size: 32px; font-weight: 800; }
-    .stat-lab { font-size: 11px; color: #6B7280; }
-
-    .cert-quote {
-      background: #252525;
-      border-radius: 12px;
-      padding: 16px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      align-items: center;
-      width: 100%;
-    }
-    .quote-text { font-size: 14px; color: #FFFFFF; text-align: center; }
-    .quote-meta { font-size: 12px; color: #9CA3AF; }
-
-    .cert-date { font-size: 12px; color: #6B7280; }
+    /* Top posts of user */
+    .section-title { font-size: 14px; font-weight: 600; color: #6B7280; align-self: flex-start; }
+    .my-post-card { background: #1A1A1A; border-radius: 16px; padding: 14px 16px; width: 100%; display: flex; align-items: flex-start; gap: 12px; border: 1px solid #252525; }
+    .rank-dot { width: 28px; height: 28px; border-radius: 14px; background: #252525; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #6B7280; flex-shrink: 0; }
+    .rank-dot.top { background: rgba(225,29,72,0.15); color: #E11D48; }
+    .my-post-text { font-size: 13px; color: #D1D5DB; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
+    .my-post-score { font-size: 12px; font-weight: 700; color: #E11D48; margin-top: 4px; }
 
     /* Bottom */
-    .bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 402px; background: #0F0F0F; padding: 16px 20px 34px; display: flex; gap: 12px; z-index: 50; }
-    .save-btn { flex: 1; height: 52px; border-radius: 26px; background: #1F1F1F; border: 1px solid #333333; color: #FFFFFF; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .share-btn { flex: 1; height: 52px; border-radius: 26px; background: #E11D48; border: none; color: #FFFFFF; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 402px; background: #0F0F0F; border-top: 1px solid #1F1F1F; padding: 14px 16px env(safe-area-inset-bottom, 16px); display: flex; gap: 10px; z-index: 50; }
+    .save-btn { flex: 1; height: 52px; border-radius: 26px; background: #1F1F1F; border: 1px solid #333; color: #FFFFFF; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .share-btn { flex: 1.5; height: 52px; border-radius: 26px; background: #E11D48; border: none; color: #FFFFFF; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(225,29,72,0.35); }
   </style>
 </head>
 <body>
 <div class="app">
   <div class="header">
-    <button class="header-icon" onclick="location.href='index.html'">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    <button class="icon-btn" onclick="history.back()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
     </button>
     <span class="header-title">社死等级证书</span>
-    <button class="header-icon" onclick="sharePost()">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+    <button class="icon-btn" onclick="shareCert()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
     </button>
   </div>
 
-  <div class="content">
-    <div class="cert-card" id="certCard">
-      <div class="cert-badge">💀</div>
-      <div class="cert-level">地狱级社死王</div>
-      <div class="cert-name">社恐本恐</div>
-      <div class="cert-divider"></div>
-      <div class="cert-stats">
-        <div class="stat-item">
-          <div class="stat-val" style="color:#E11D48">98</div>
-          <div class="stat-lab">最高社死指数</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-val" style="color:#FFFFFF">23</div>
-          <div class="stat-lab">社死故事数</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-val" style="color:#FFD700">#1</div>
-          <div class="stat-lab">本周排名</div>
-        </div>
-      </div>
-      <div class="cert-quote">
-        <div class="quote-text">「在厕所吐槽领导被抓包」</div>
-        <div class="quote-meta">代表作 · 获赞 2.3k</div>
-      </div>
-      <div class="cert-date" id="certDate">颁发于 2024年2月4日</div>
-    </div>
+  <div class="scroll-area" id="scrollArea">
+    <div style="color:#6B7280;padding:60px 0;text-align:center;font-size:14px">加载中…</div>
   </div>
 
-  <div class="bottom-bar">
-    <button class="save-btn" onclick="saveImg()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-      <span>保存图片</span>
+  <div class="bottom-bar" id="bottomBar" style="display:none">
+    <button class="save-btn" onclick="saveCert()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      保存图片
     </button>
-    <button class="share-btn" onclick="sharePost()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-      <span>分享证书</span>
+    <button class="share-btn" onclick="shareCert()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+      分享证书
     </button>
   </div>
 </div>
 
+<script src="app.js"></script>
 <script>
-const d = new Date();
-document.getElementById('certDate').textContent =
-  `颁发于 ${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+  const LEVELS = [
+    { min: 90, icon: '🔥', badge: '地狱级社死王' },
+    { min: 75, icon: '😱', badge: '极高危社死大师' },
+    { min: 60, icon: '😰', badge: '高危社死选手' },
+    { min: 40, icon: '😅', badge: '中度社死达人' },
+    { min: 0,  icon: '🙈', badge: '轻度社死新手' },
+  ];
 
-function saveImg() {
-  const btn = event.currentTarget;
-  btn.innerHTML = '<span>✅ 已保存</span>';
-  setTimeout(() => {
-    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg><span>保存图片</span>';
-  }, 2000);
-}
+  async function load() {
+    const authorId = getAuthorId();
+    const myPosts = await DB.getUserPosts(authorId);
+    const area = document.getElementById('scrollArea');
 
-function sharePost() {
-  if (navigator.share) {
-    navigator.share({ title: '我的社死等级证书', text: '我获得了「地狱级社死王」认证，指数98/100！', url: location.href });
-  } else {
-    const btn = document.querySelector('.share-btn');
-    btn.innerHTML = '<span>✅ 链接已复制</span>';
-    setTimeout(() => {
-      btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg><span>分享证书</span>';
-    }, 2000);
+    if (myPosts.length === 0) {
+      area.innerHTML = `
+        <div class="no-posts">
+          <div class="emoji">😶‍🌫️</div>
+          <h2>还没有社死经历</h2>
+          <p>投稿你的第一个社死故事<br>解锁专属等级证书！</p>
+          <a href="submit.html" class="go-submit">去投稿 →</a>
+        </div>`;
+      return;
+    }
+
+    const maxIndex = Math.max(...myPosts.map(p => p.deathIndex));
+    const totalLikes = myPosts.reduce((s, p) => s + p.likes, 0);
+    const bestRank = await DB.getUserRank(authorId);
+    const topPost = myPosts.sort((a, b) => b.deathIndex - a.deathIndex)[0];
+    const level = LEVELS.find(l => maxIndex >= l.min);
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
+
+    document.getElementById('bottomBar').style.display = 'flex';
+
+    area.innerHTML = `
+      <div class="cert-card" id="certCard">
+        <div class="cert-inner">
+          <div class="cert-badge">${level.icon}</div>
+          <div class="cert-level">${level.badge}</div>
+          <div class="cert-name">匿名社死选手</div>
+          <div class="cert-divider"></div>
+          <div class="stats-row">
+            <div class="stat">
+              <div class="stat-val" style="color:#E11D48">${maxIndex}</div>
+              <div class="stat-lab">最高社死指数</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val" style="color:#FFFFFF">${myPosts.length}</div>
+              <div class="stat-lab">社死故事数</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val" style="color:#FFD700">${bestRank ? '#' + bestRank : '—'}</div>
+              <div class="stat-lab">最高排名</div>
+            </div>
+          </div>
+          <div class="cert-quote">
+            <div class="quote-label">🏆 代表作</div>
+            <div class="quote-text">「${topPost.content.slice(0, 40)}${topPost.content.length > 40 ? '…' : ''}」</div>
+            <div class="quote-meta">社死指数 ${topPost.deathIndex}/100 · 获赞 ${formatNum(topPost.likes)}</div>
+          </div>
+          <div class="cert-date">颁发于 ${dateStr}</div>
+        </div>
+      </div>
+
+      ${myPosts.length > 1 ? `
+        <div class="section-title">我的社死历程</div>
+        ${myPosts.slice(0, 5).map((p, i) => `
+          <div class="my-post-card">
+            <div class="rank-dot ${i === 0 ? 'top' : ''}">#${i+1}</div>
+            <div style="flex:1">
+              <div class="my-post-text">${p.content}</div>
+              <div class="my-post-score">💀 ${p.deathIndex}/100 · ${p.deathLevel}</div>
+            </div>
+          </div>
+        `).join('')}
+      ` : ''}
+    `;
   }
-}
+
+  function saveCert() {
+    showToast('图片保存功能需要添加 html2canvas 库（即将支持）');
+  }
+
+  function shareCert() {
+    const text = '我在社死排行榜获得了专属社死等级证书！来看看我的尴尬故事 👉';
+    if (navigator.share) {
+      navigator.share({ title: '社死等级证书', text, url: location.origin + '/index.html' });
+    } else {
+      navigator.clipboard?.writeText(location.href).then(() => showToast('链接已复制，快去分享！'));
+    }
+  }
+
+  load();
 </script>
 </body>
 </html>
