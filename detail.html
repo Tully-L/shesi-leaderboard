@@ -69,7 +69,7 @@
     .nav-icon { font-size: 22px; line-height: 1; }
     .nav-label { font-size: 10px; color: #9CA3AF; font-weight: 500; }
     .nav-item.active .nav-label { color: #E11D48; }
-    .nav-fab { width: 46px; height: 46px; border-radius: 23px; background: #E11D48; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 12px rgba(225,29,72,0.35); margin-top: -10px; }
+    .nav-fab { width: 60px; height: 60px; border-radius: 30px; background: #E11D48; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 16px rgba(225,29,72,0.45); margin-top: -18px; }
 
     /* Inline certificate */
     .cert-inline { background: linear-gradient(135deg, #1A1A1A 0%, #2D1018 100%); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 14px; border: 1px solid rgba(225,29,72,0.25); }
@@ -125,6 +125,7 @@
   const params = new URLSearchParams(location.search);
   const postId = params.get('id');
   let currentPost = null;
+  let _certHtml = null; // cached cert HTML, survives render() calls
   const C_COLORS = ['#E0E7FF','#FCE7F3','#D1FAE5','#FEF3C7','#DBEAFE','#F3E8FF'];
   const C_EMOJIS = ['😂','🤣','😱','🫣','😭','🤦','👀','💀'];
 
@@ -149,48 +150,51 @@
     { min: 0,  icon: '🙈', label: '轻度社死新手' },
   ];
 
+  function updateCertSection() {
+    if (_certHtml === null) return;
+    const el = document.getElementById('certSection');
+    if (el) el.innerHTML = _certHtml;
+  }
+
   async function loadCert() {
     const authorId = getAuthorId();
     const [myPosts, rank] = await Promise.all([DB.getUserPosts(authorId), DB.getUserRank(authorId)]);
-    const el = document.getElementById('certSection');
-    if (!el) return;
 
     if (!myPosts.length) {
-      el.innerHTML = `
+      _certHtml = `
         <div class="cert-inline">
           <div class="cert-inline-empty">😶‍🌫️ 你还没有社死经历<br><span style="font-size:12px">投稿后解锁你的专属证书</span></div>
           <a class="cert-inline-cta" href="submit.html">✍️ 去投稿，领取证书</a>
         </div>`;
-      return;
+    } else {
+      const maxIdx = Math.max(...myPosts.map(p => p.deathIndex));
+      const lv = CERT_LEVELS.find(l => maxIdx >= l.min);
+      _certHtml = `
+        <div class="cert-inline">
+          <div class="cert-inline-head">
+            <div class="cert-inline-badge">${lv.icon}</div>
+            <div>
+              <div class="cert-inline-title">你的社死等级</div>
+              <div class="cert-inline-level">${lv.label}</div>
+            </div>
+          </div>
+          <div class="cert-inline-stats">
+            <div class="cert-stat">
+              <div class="cert-stat-val" style="color:#E11D48">${maxIdx}</div>
+              <div class="cert-stat-lab">最高指数</div>
+            </div>
+            <div class="cert-stat">
+              <div class="cert-stat-val">${myPosts.length}</div>
+              <div class="cert-stat-lab">故事数</div>
+            </div>
+            <div class="cert-stat">
+              <div class="cert-stat-val" style="color:#FFD700">${rank ? '#' + rank : '—'}</div>
+              <div class="cert-stat-lab">最高排名</div>
+            </div>
+          </div>
+        </div>`;
     }
-
-    const maxIdx = Math.max(...myPosts.map(p => p.deathIndex));
-    const lv = CERT_LEVELS.find(l => maxIdx >= l.min);
-    el.innerHTML = `
-      <div class="cert-inline">
-        <div class="cert-inline-head">
-          <div class="cert-inline-badge">${lv.icon}</div>
-          <div>
-            <div class="cert-inline-title">你的社死等级</div>
-            <div class="cert-inline-level">${lv.label}</div>
-          </div>
-        </div>
-        <div class="cert-inline-stats">
-          <div class="cert-stat">
-            <div class="cert-stat-val" style="color:#E11D48">${maxIdx}</div>
-            <div class="cert-stat-lab">最高指数</div>
-          </div>
-          <div class="cert-stat">
-            <div class="cert-stat-val">${myPosts.length}</div>
-            <div class="cert-stat-lab">故事数</div>
-          </div>
-          <div class="cert-stat">
-            <div class="cert-stat-val" style="color:#FFD700">${rank ? '#' + rank : '—'}</div>
-            <div class="cert-stat-lab">最高排名</div>
-          </div>
-        </div>
-        <a class="cert-inline-cta" href="certificate.html">🏅 查看完整证书</a>
-      </div>`;
+    updateCertSection();
   }
 
   function render(post, comments) {
@@ -259,6 +263,7 @@
             </div>
           </div>`).join('')}
     `;
+    updateCertSection();
     // Animate bar
     requestAnimationFrame(() => {
       setTimeout(() => {
