@@ -12,20 +12,20 @@ const CONFIG = {
   GLM_MODEL: 'glm-4-flash',
 };
 
-// ── Supabase 客户端（懒加载）────────────────────────────────
-let _sb = null;
-async function getSB() {
-  if (_sb) return _sb;
-  if (!window.supabase) {
-    await new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
-      s.onload = resolve; s.onerror = reject;
-      document.head.appendChild(s);
-    });
-  }
-  _sb = (window.supabase || supabase).createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-  return _sb;
+// ── Supabase REST API 直接调用（无需第三方库，彻底规避 CSP eval 问题）──
+async function sbFetch(path, opts = {}) {
+  const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/${path}`, {
+    ...opts,
+    headers: {
+      'apikey': CONFIG.SUPABASE_KEY,
+      'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      ...opts.headers,
+    },
+  });
+  if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
+  if (res.status === 204) return null;
+  return res.json();
 }
 
 // ── HTML 转义（防止用户内容注入） ───────────────────────────
@@ -145,44 +145,43 @@ const DB = {
 
   async getPosts(sort = 'hot') {
     if (CONFIG.USE_SUPABASE) {
-      const sb = await getSB();
-      let q = sb.from('posts').select('*, comment_count:comments(count)');
-      if (sort === 'new')  q = q.order('created_at', { ascending: false });
-      else if (sort === 'hall') q = q.order('death_index', { ascending: false });
-      else q = q.order('likes', { ascending: false });
-      const { data, error } = await q.limit(50);
-      if (error) { console.error(error); return localDB.getPosts(sort); }
-      return (data || []).map(r => ({ ...mapPost(r), commentCount: r.comment_count?.[0]?.count || 0 }));
+      try {
+        const order = sort === 'new' ? 'created_at.desc' : sort === 'hall' ? 'death_index.desc' : 'likes.desc';
+        const data = await sbFetch(`posts?select=*,comments(count)&order=${order}&limit=50`);
+        return (data || []).map(r => ({ ...mapPost(r), commentCount: r.comments?.[0]?.count || 0 }));
+      } catch (e) { console.error(e); return localDB.getPosts(sort); }
     }
     return localDB.getPosts(sort);
   },
 
   async getPost(id) {
     if (CONFIG.USE_SUPABASE) {
-      const sb = await getSB();
-      const { data, error } = await sb.from('posts').select('*').eq('id', id).single();
-      if (error || !data) return null;
-      return mapPost(data);
+      try {
+        const data = await sbFetch(`posts?id=eq.${id}&limit=1`);
+        return data?.[0] ? mapPost(data[0]) : null;
+      } catch (e) { console.error(e); return null; }
     }
     return localDB.getPost(id);
   },
 
   async savePost(post) {
     if (CONFIG.USE_SUPABASE) {
-      const sb = await getSB();
-      const { data, error } = await sb.from('posts').insert({
-        content: post.content,
-        tag: post.tag,
-        death_index: post.deathIndex,
-        death_level: post.deathLevel,
-        death_reason: post.deathReason,
-        anonymous: post.anonymous,
-        location: post.location || '',
-        author_id: post.authorId || getAuthorId(),
-        likes: 0,
-      }).select().single();
-      if (error) { console.error(error); throw error; }
-      return mapPost(data);
+      const data = await sbFetch('posts', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify({
+          content: post.content,
+          tag: post.tag,
+          death_index: post.deathIndex,
+          death_level: post.deathLevel,
+          death_reason: post.deathReason,
+          anonymous: post.anonymous,
+          location: post.location || '',
+          author_id: post.authorId || getAuthorId(),
+          likes: 0,
+        }),
+      });
+      return mapPost(Array.isArray(data) ? data[0] : data);
     }
     return localDB.savePost(post);
   },
@@ -190,8 +189,12 @@ const DB = {
   async likePost(id) {
     const nowLiked = toggleLiked(id);
     if (CONFIG.USE_SUPABASE) {
-      const sb = await getSB();
-      await sb.rpc('toggle_like', { p_post_id: id, p_delta: nowLiked ? 1 : -1 });
+      try {
+        await sbFetch('rpc/toggle_like', {
+          method: 'POST',
+          body: JSON.stringify({ p_post_id: id, p_delta: nowLiked ? 1 : -1 }),
+        });
+      } catch (e) { console.error(e); }
     } else {
       localDB.likePost(id, nowLiked);
     }
@@ -202,25 +205,22 @@ const DB = {
 
   async getComments(postId) {
     if (CONFIG.USE_SUPABASE) {
-      const sb = await getSB();
-      const { data, error } = await sb.from('comments')
-        .select('*').eq('post_id', postId).order('created_at', { ascending: false });
-      if (error) return [];
-      return (data || []).map(mapComment);
+      try {
+        const data = await sbFetch(`comments?post_id=eq.${postId}&order=created_at.desc`);
+        return (data || []).map(mapComment);
+      } catch (e) { return []; }
     }
     return localDB.getComments(postId);
   },
 
   async addComment(postId, content) {
     if (CONFIG.USE_SUPABASE) {
-      const sb = await getSB();
-      const { data, error } = await sb.from('comments').insert({
-        post_id: postId,
-        content,
-        author_id: getAuthorId(),
-      }).select().single();
-      if (error) throw error;
-      return mapComment(data);
+      const data = await sbFetch('comments', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify({ post_id: postId, content, author_id: getAuthorId() }),
+      });
+      return mapComment(Array.isArray(data) ? data[0] : data);
     }
     return localDB.addComment(postId, content);
   },
@@ -229,23 +229,22 @@ const DB = {
 
   async getUserPosts(authorId) {
     if (CONFIG.USE_SUPABASE) {
-      const sb = await getSB();
-      const { data, error } = await sb.from('posts')
-        .select('*').eq('author_id', authorId).order('death_index', { ascending: false });
-      if (error) return [];
-      return (data || []).map(mapPost);
+      try {
+        const data = await sbFetch(`posts?author_id=eq.${authorId}&order=death_index.desc`);
+        return (data || []).map(mapPost);
+      } catch (e) { return []; }
     }
     return localDB.getUserPosts(authorId);
   },
 
   async getUserRank(authorId) {
     if (CONFIG.USE_SUPABASE) {
-      const sb = await getSB();
-      const { data } = await sb.from('posts')
-        .select('author_id, death_index').order('death_index', { ascending: false });
-      if (!data) return null;
-      const idx = data.findIndex(p => p.author_id === authorId);
-      return idx === -1 ? null : idx + 1;
+      try {
+        const data = await sbFetch('posts?select=author_id,death_index&order=death_index.desc');
+        if (!data) return null;
+        const idx = data.findIndex(p => p.author_id === authorId);
+        return idx === -1 ? null : idx + 1;
+      } catch (e) { return null; }
     }
     return localDB.getUserRank(authorId);
   },
