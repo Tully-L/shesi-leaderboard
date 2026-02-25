@@ -64,6 +64,17 @@
     .submit-btn:disabled { background: #D1D5DB; box-shadow: none; cursor: not-allowed; }
     .submit-btn:not(:disabled):active { opacity: 0.85; }
     .disclaimer { text-align: center; font-size: 11px; color: #9CA3AF; }
+
+    /* Location sheet */
+    .sheet-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+    .sheet-mask.show { opacity: 1; pointer-events: auto; }
+    .sheet { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 100%; max-width: 402px; background: #FFFFFF; border-radius: 20px 20px 0 0; padding: 16px 16px env(safe-area-inset-bottom, 20px); z-index: 101; transition: transform 0.25s cubic-bezier(0.32,0.72,0,1); }
+    .sheet.show { transform: translateX(-50%) translateY(0); }
+    .sheet-title { font-size: 15px; font-weight: 700; color: #1A1A1A; text-align: center; margin-bottom: 16px; }
+    .city-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .city-btn { height: 44px; border-radius: 12px; border: 1.5px solid #E5E7EB; background: #F9FAFB; color: #374151; font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: all 0.15s; }
+    .city-btn.selected { border-color: #E11D48; background: #FEF2F2; color: #E11D48; font-weight: 600; }
+    .city-btn:active { opacity: 0.7; }
   </style>
 </head>
 <body>
@@ -137,6 +148,13 @@
     </button>
     <div class="disclaimer">发布即表示同意《社区规范》，请勿发布虚假或侵权内容</div>
   </div>
+
+  <!-- Location sheet -->
+  <div class="sheet-mask" id="sheetMask" onclick="closeSheet()"></div>
+  <div class="sheet" id="locationSheet">
+    <div class="sheet-title">📍 选择地点</div>
+    <div class="city-grid" id="cityGrid"></div>
+  </div>
 </div>
 
 <script src="app.js"></script>
@@ -167,12 +185,26 @@
     btn.classList.toggle('off', !anonOn);
   }
 
+  const CITIES = ['不添加','北京','上海','广州','深圳','成都','杭州','武汉','西安','南京','重庆','其他'];
+
   function pickLocation() {
-    const cities = ['不添加','北京','上海','广州','深圳','成都','杭州','武汉','西安','南京','重庆'];
-    const current = cities.indexOf(location_ || '不添加');
-    const next = cities[(current + 1) % cities.length];
-    location_ = next === '不添加' ? '' : next;
-    document.getElementById('locationVal').textContent = next;
+    // Render city grid
+    document.getElementById('cityGrid').innerHTML = CITIES.map(c => `
+      <button class="city-btn ${(location_ || '不添加') === c ? 'selected' : ''}" onclick="selectCity('${c}')">${c}</button>
+    `).join('');
+    document.getElementById('sheetMask').classList.add('show');
+    document.getElementById('locationSheet').classList.add('show');
+  }
+
+  function selectCity(city) {
+    location_ = city === '不添加' ? '' : city;
+    document.getElementById('locationVal').textContent = city;
+    closeSheet();
+  }
+
+  function closeSheet() {
+    document.getElementById('sheetMask').classList.remove('show');
+    document.getElementById('locationSheet').classList.remove('show');
   }
 
   function checkReady() {
@@ -222,28 +254,34 @@
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.textContent = 'AI 评估中…';
+    btn.innerHTML = '⏳ AI 评估中…';
 
-    // If we don't have a score yet, compute it now
-    if (!scoreResult) {
-      scoreResult = await calcDeathIndex(content);
+    try {
+      if (!scoreResult) {
+        scoreResult = await calcDeathIndex(content);
+      }
+
+      const post = {
+        content,
+        tag: selectedTag,
+        deathIndex: scoreResult.score,
+        deathLevel: scoreResult.level,
+        deathReason: scoreResult.reason,
+        anonymous: anonOn,
+        location: location_,
+        authorId: getAuthorId(),
+      };
+
+      const saved = await DB.savePost(post);
+      localStorage.removeItem('shesi_draft');
+      showToast('发布成功！正在跳转…');
+      setTimeout(() => { location.href = 'detail.html?id=' + saved.id; }, 800);
+    } catch (err) {
+      console.error('submitPost error:', err);
+      showToast('发布失败，请重试', 'error');
+      btn.disabled = false;
+      btn.innerHTML = '🚀 发布社死经历';
     }
-
-    const post = {
-      content,
-      tag: selectedTag,
-      deathIndex: scoreResult.score,
-      deathLevel: scoreResult.level,
-      deathReason: scoreResult.reason,
-      anonymous: anonOn,
-      location: location_,
-      authorId: getAuthorId(),
-    };
-
-    const saved = await DB.savePost(post);
-    localStorage.removeItem('shesi_draft');
-    showToast('发布成功！正在跳转…');
-    setTimeout(() => { location.href = 'detail.html?id=' + saved.id; }, 800);
   }
 
   // Restore draft
