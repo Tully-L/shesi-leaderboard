@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>社死等级证书</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background: #0F0F0F; font-family: 'DM Sans', -apple-system, sans-serif; color: #FFFFFF; }
+    .app { max-width: 402px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+
+    .header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .header-icon { color: #FFFFFF; cursor: pointer; background: none; border: none; display: flex; align-items: center; }
+    .header-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 18px; font-weight: 700; color: #FFFFFF; }
+
+    .content { padding: 24px; display: flex; flex-direction: column; gap: 24px; align-items: center; flex: 1; padding-bottom: 130px; }
+
+    /* Certificate card */
+    .cert-card {
+      width: 100%;
+      background: linear-gradient(180deg, #1F1F1F 0%, #2D2D2D 100%);
+      border-radius: 24px;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      border: 2px solid rgba(225,29,72,0.25);
+    }
+
+    /* Badge circle */
+    .cert-badge {
+      width: 120px;
+      height: 120px;
+      border-radius: 60px;
+      background: radial-gradient(circle, #E11D48 0%, #BE123C 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 56px;
+    }
+
+    .cert-level {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: #E11D48;
+      text-align: center;
+    }
+
+    .cert-name {
+      font-size: 18px;
+      color: #FFFFFF;
+      text-align: center;
+    }
+
+    .cert-divider { width: 200px; height: 1px; background: #333333; }
+
+    .cert-stats { display: flex; gap: 16px; justify-content: center; width: 100%; }
+    .stat-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .stat-val { font-family: 'Bricolage Grotesque', sans-serif; font-size: 32px; font-weight: 800; }
+    .stat-lab { font-size: 11px; color: #6B7280; }
+
+    .cert-quote {
+      background: #252525;
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+    }
+    .quote-text { font-size: 14px; color: #FFFFFF; text-align: center; }
+    .quote-meta { font-size: 12px; color: #9CA3AF; }
+
+    .cert-date { font-size: 12px; color: #6B7280; }
+
+    /* Bottom */
+    .bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 402px; background: #0F0F0F; padding: 16px 20px 34px; display: flex; gap: 12px; z-index: 50; }
+    .save-btn { flex: 1; height: 52px; border-radius: 26px; background: #1F1F1F; border: 1px solid #333333; color: #FFFFFF; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .share-btn { flex: 1; height: 52px; border-radius: 26px; background: #E11D48; border: none; color: #FFFFFF; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <button class="header-icon" onclick="location.href='index.html'">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+    <span class="header-title">社死等级证书</span>
+    <button class="header-icon" onclick="sharePost()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+    </button>
+  </div>
+
+  <div class="content">
+    <div class="cert-card" id="certCard">
+      <div class="cert-badge">💀</div>
+      <div class="cert-level">地狱级社死王</div>
+      <div class="cert-name">社恐本恐</div>
+      <div class="cert-divider"></div>
+      <div class="cert-stats">
+        <div class="stat-item">
+          <div class="stat-val" style="color:#E11D48">98</div>
+          <div class="stat-lab">最高社死指数</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" style="color:#FFFFFF">23</div>
+          <div class="stat-lab">社死故事数</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val" style="color:#FFD700">#1</div>
+          <div class="stat-lab">本周排名</div>
+        </div>
+      </div>
+      <div class="cert-quote">
+        <div class="quote-text">「在厕所吐槽领导被抓包」</div>
+        <div class="quote-meta">代表作 · 获赞 2.3k</div>
+      </div>
+      <div class="cert-date" id="certDate">颁发于 2024年2月4日</div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="save-btn" onclick="saveImg()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      <span>保存图片</span>
+    </button>
+    <button class="share-btn" onclick="sharePost()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+      <span>分享证书</span>
+    </button>
+  </div>
+</div>
+
+<script>
+const d = new Date();
+document.getElementById('certDate').textContent =
+  `颁发于 ${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+
+function saveImg() {
+  const btn = event.currentTarget;
+  btn.innerHTML = '<span>✅ 已保存</span>';
+  setTimeout(() => {
+    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg><span>保存图片</span>';
+  }, 2000);
+}
+
+function sharePost() {
+  if (navigator.share) {
+    navigator.share({ title: '我的社死等级证书', text: '我获得了「地狱级社死王」认证，指数98/100！', url: location.href });
+  } else {
+    const btn = document.querySelector('.share-btn');
+    btn.innerHTML = '<span>✅ 链接已复制</span>';
+    setTimeout(() => {
+      btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg><span>分享证书</span>';
+    }, 2000);
+  }
+}
+</script>
+</body>
+</html>

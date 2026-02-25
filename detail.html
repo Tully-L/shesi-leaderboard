@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>社死详情</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background: #FFF5F5; font-family: 'DM Sans', -apple-system, sans-serif; }
+    .app { max-width: 402px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+
+    .header { background: #FFFFFF; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .header-icon { width: 24px; height: 24px; color: #1A1A1A; cursor: pointer; display: flex; align-items: center; }
+    .header-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 18px; font-weight: 700; color: #1A1A1A; }
+
+    .content { padding: 8px 20px 120px; display: flex; flex-direction: column; gap: 16px; }
+
+    /* Story card */
+    .story-card { background: #FFFFFF; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .user-row { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 48px; height: 48px; border-radius: 24px; background: #FCD34D; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+    .user-name { font-size: 16px; font-weight: 600; color: #1A1A1A; }
+    .user-meta { font-size: 13px; color: #9CA3AF; }
+    .rank-badge { background: #FEF3C7; color: #D97706; border-radius: 16px; padding: 8px 14px; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; margin-left: auto; flex-shrink: 0; }
+    .story-text { font-size: 16px; color: #1A1A1A; line-height: 1.6; }
+
+    /* Score card */
+    .score-card { background: #FEF2F2; border-radius: 16px; padding: 16px; display: flex; align-items: center; justify-content: space-between; }
+    .score-left { display: flex; align-items: center; gap: 8px; }
+    .score-skull { font-size: 28px; }
+    .score-label { font-size: 13px; color: #9CA3AF; }
+    .score-num { font-size: 22px; font-weight: 800; color: #E11D48; font-family: 'Bricolage Grotesque', sans-serif; }
+    .score-right { display: flex; flex-direction: column; gap: 4px; width: 100px; }
+    .score-bar-bg { background: #FECACA; border-radius: 4px; height: 8px; overflow: hidden; }
+    .score-bar-fill { height: 100%; background: #E11D48; border-radius: 4px; }
+    .score-level { font-size: 11px; font-weight: 600; color: #E11D48; text-align: right; }
+
+    /* Actions */
+    .actions-row { display: flex; justify-content: space-around; align-items: center; }
+    .action-item { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .action-num { font-size: 15px; font-weight: 600; color: #1A1A1A; }
+    .action-icon { font-size: 22px; }
+    .icon-gray { color: #6B7280; }
+
+    /* Comments */
+    .comments-title { font-size: 16px; font-weight: 700; color: #1A1A1A; }
+    .comment-card { background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; gap: 12px; }
+    .c-avatar { width: 36px; height: 36px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .c-name { font-size: 13px; font-weight: 600; color: #1A1A1A; }
+    .c-text { font-size: 14px; color: #6B7280; line-height: 1.5; margin-top: 4px; }
+    .c-meta { display: flex; gap: 12px; margin-top: 6px; font-size: 12px; color: #9CA3AF; align-items: center; }
+
+    /* Bottom input */
+    .bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 402px; background: #FFFFFF; border-top: 1px solid #F3F4F6; padding: 12px 20px 34px; display: flex; align-items: center; gap: 12px; z-index: 50; }
+    .input-box { flex: 1; height: 44px; border-radius: 22px; background: #F6F7F8; border: none; outline: none; padding: 0 16px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: #9CA3AF; }
+    .input-box:focus { color: #1A1A1A; }
+    .send-btn { width: 44px; height: 44px; border-radius: 22px; background: #E11D48; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <a href="index.html" class="header-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </a>
+    <span class="header-title">社死详情</span>
+    <div class="header-icon" style="justify-content:flex-end;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Story Card -->
+    <div class="story-card">
+      <div class="user-row">
+        <div class="avatar">🙈</div>
+        <div>
+          <div class="user-name">社恐本恐</div>
+          <div class="user-meta">2小时前 · 北京</div>
+        </div>
+        <div class="rank-badge">
+          <span>🏆</span><span>#1 本周</span>
+        </div>
+      </div>
+
+      <div class="story-text">
+        在公司厕所打电话吐槽领导，说他开会又臭又长，天天画大饼。出来发现领导就站在门口洗手，我们四目相对了整整三秒钟...<br><br>
+        更社死的是，第二天领导开会专门表扬了我「敢于直言」。全公司都知道了。
+      </div>
+
+      <div class="score-card">
+        <div class="score-left">
+          <span class="score-skull">💀</span>
+          <div>
+            <div class="score-label">社死指数</div>
+            <div class="score-num">98 / 100</div>
+          </div>
+        </div>
+        <div class="score-right">
+          <div class="score-bar-bg">
+            <div class="score-bar-fill" style="width:98%"></div>
+          </div>
+          <div class="score-level">地狱级社死</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions-row">
+      <div class="action-item" onclick="toggleLike(this)">
+        <span class="action-icon like-icon">😂</span>
+        <span class="action-num like-num">2.3k</span>
+      </div>
+      <div class="action-item">
+        <svg class="icon-gray" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <span class="action-num">328</span>
+      </div>
+      <div class="action-item" onclick="sharePost()">
+        <svg class="icon-gray" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+        <span class="action-num">分享</span>
+      </div>
+    </div>
+
+    <!-- Comments -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="comments-title">热门评论</div>
+      <div class="comment-card">
+        <div class="c-avatar" style="background:#E0E7FF">😱</div>
+        <div style="flex:1">
+          <div class="c-name">打工人日记</div>
+          <div class="c-text">哈哈哈哈领导这招高啊，杀人诛心！</div>
+          <div class="c-meta">
+            <span>1小时前</span>
+            <span>😂 692</span>
+          </div>
+        </div>
+      </div>
+      <div class="comment-card">
+        <div class="c-avatar" style="background:#FCE7F3">🤣</div>
+        <div style="flex:1">
+          <div class="c-name">社死研究员</div>
+          <div class="c-text">这个必须上名人堂，太经典了</div>
+          <div class="c-meta">
+            <span>45分钟前</span>
+            <span>😂 567</span>
+          </div>
+        </div>
+      </div>
+      <div class="comment-card">
+        <div class="c-avatar" style="background:#D1FAE5">😭</div>
+        <div style="flex:1">
+          <div class="c-name">匿名围观者</div>
+          <div class="c-text">领导说"全公司都知道了"那一刻，我替你感受到了窒息</div>
+          <div class="c-meta">
+            <span>30分钟前</span>
+            <span>😂 412</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a href="certificate.html" style="text-decoration:none">
+      <div style="background:#FEF2F2;border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer">
+        <span style="font-size:24px">🏅</span>
+        <div>
+          <div style="font-size:15px;font-weight:600;color:#1A1A1A">查看我的社死等级证书</div>
+          <div style="font-size:13px;color:#9CA3AF;margin-top:2px">获取专属社死认证</div>
+        </div>
+        <svg style="margin-left:auto;flex-shrink:0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
+    </a>
+  </div>
+
+  <div class="bottom-bar">
+    <input class="input-box" type="text" placeholder="说点什么安慰一下...">
+    <button class="send-btn" onclick="sendComment()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+let liked = false;
+function toggleLike(el) {
+  liked = !liked;
+  el.querySelector('.like-icon').textContent = liked ? '❤️' : '😂';
+  el.querySelector('.like-num').textContent = liked ? '2.3k+1' : '2.3k';
+}
+function sharePost() {
+  if (navigator.share) navigator.share({ title: '社死排行榜', url: location.href });
+  else alert('链接已复制！');
+}
+function sendComment() {
+  const input = document.querySelector('.input-box');
+  if (input.value.trim()) { alert('评论发布成功！'); input.value = ''; }
+}
+</script>
+</body>
+</html>

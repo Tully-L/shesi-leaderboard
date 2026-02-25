@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>投稿社死经历</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background: #FFFFFF; font-family: 'DM Sans', -apple-system, sans-serif; }
+    .app { max-width: 402px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+
+    .header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .header-icon { color: #1A1A1A; cursor: pointer; display: flex; align-items: center; background: none; border: none; }
+    .header-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 18px; font-weight: 700; color: #1A1A1A; }
+    .draft-btn { font-size: 14px; color: #9CA3AF; background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+    .content { padding: 8px 20px; display: flex; flex-direction: column; gap: 20px; flex: 1; padding-bottom: 130px; }
+
+    /* Tip banner */
+    .tip-banner { background: #FEF3C7; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 8px; }
+    .tip-text { font-size: 13px; color: #D97706; }
+
+    /* Textarea */
+    .textarea-wrap { background: #F6F7F8; border-radius: 16px; padding: 16px; min-height: 200px; }
+    textarea { width: 100%; background: transparent; border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 15px; color: #1A1A1A; line-height: 1.6; resize: none; min-height: 168px; }
+    textarea::placeholder { color: #9CA3AF; }
+    .char-count { text-align: right; font-size: 12px; color: #9CA3AF; margin-top: -12px; }
+
+    /* Option rows */
+    .option-row { background: #F6F7F8; border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+    .option-left { display: flex; align-items: center; gap: 10px; }
+    .option-icon { font-size: 20px; }
+    .option-text { font-size: 15px; color: #1A1A1A; }
+    .option-right { display: flex; align-items: center; gap: 4px; }
+    .option-value { font-size: 14px; color: #9CA3AF; }
+
+    /* Toggle */
+    .toggle { width: 48px; height: 28px; border-radius: 14px; background: #E11D48; position: relative; cursor: pointer; border: none; transition: background 0.2s; }
+    .toggle.off { background: #D1D5DB; }
+    .toggle-knob { width: 24px; height: 24px; background: #FFFFFF; border-radius: 12px; position: absolute; top: 2px; left: 22px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle.off .toggle-knob { left: 2px; }
+
+    /* Preview card */
+    .preview-card { background: #FEF2F2; border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 12px; }
+    .preview-skull { font-size: 28px; }
+    .preview-label { font-size: 13px; color: #9CA3AF; }
+    .preview-value { font-size: 15px; font-weight: 600; color: #E11D48; margin-top: 4px; }
+
+    /* Bottom */
+    .bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 402px; background: #FFFFFF; padding: 16px 20px 34px; display: flex; flex-direction: column; gap: 8px; z-index: 50; }
+    .submit-btn { width: 100%; height: 56px; border-radius: 28px; border: none; background: #E11D48; color: #FFFFFF; font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .disclaimer { text-align: center; font-size: 11px; color: #9CA3AF; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <button class="header-icon" onclick="location.href='index.html'">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+    <span class="header-title">投稿社死经历</span>
+    <button class="draft-btn">草稿</button>
+  </div>
+
+  <div class="content">
+    <!-- Tip -->
+    <div class="tip-banner">
+      <span style="font-size:16px">💡</span>
+      <span class="tip-text">越真实、越详细的故事越容易上热门哦~</span>
+    </div>
+
+    <!-- Textarea -->
+    <div>
+      <div class="textarea-wrap">
+        <textarea id="storyInput" oninput="onInput()" maxlength="500"
+          placeholder="说说你的社死经历吧...&#10;&#10;比如：&#10;- 发生了什么&#10;- 当时的心情&#10;- 后续怎么样了"></textarea>
+      </div>
+      <div class="char-count"><span id="charCount">0</span> / 500</div>
+    </div>
+
+    <!-- Options -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="option-row" onclick="toggleAnon()">
+        <div class="option-left">
+          <span class="option-icon">🎭</span>
+          <span class="option-text">匿名发布</span>
+        </div>
+        <button class="toggle" id="anonToggle">
+          <div class="toggle-knob" id="anonKnob"></div>
+        </button>
+      </div>
+      <div class="option-row">
+        <div class="option-left">
+          <span class="option-icon">📍</span>
+          <span class="option-text">添加地点</span>
+        </div>
+        <div class="option-right">
+          <span class="option-value" id="locationVal">北京</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-card">
+      <span class="preview-skull">💀</span>
+      <div>
+        <div class="preview-label">预估社死指数</div>
+        <div class="preview-value" id="previewVal">输入内容后预估</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="submit-btn" onclick="submitPost()">
+      <span>🚀</span><span>发布社死经历</span>
+    </button>
+    <div class="disclaimer">发布即表示同意《社区规范》，请勿发布虚假或侵权内容</div>
+  </div>
+</div>
+
+<script>
+let anonOn = true;
+
+function toggleAnon() {
+  anonOn = !anonOn;
+  const toggle = document.getElementById('anonToggle');
+  toggle.classList.toggle('off', !anonOn);
+}
+
+function onInput() {
+  const text = document.getElementById('storyInput').value;
+  document.getElementById('charCount').textContent = text.length;
+  if (text.length > 10) {
+    const score = Math.min(100, Math.max(20, Math.round(20 + text.length * 0.6)));
+    const level = score >= 90 ? '地狱级社死 🔥' : score >= 75 ? '极高危社死 😱' : score >= 55 ? '高危社死 😰' : '中度社死 😅';
+    document.getElementById('previewVal').textContent = `${score}/100 · ${level}`;
+  } else {
+    document.getElementById('previewVal').textContent = '输入内容后预估';
+  }
+}
+
+function submitPost() {
+  const text = document.getElementById('storyInput').value.trim();
+  if (!text) { alert('请先写下你的社死经历'); return; }
+  const btn = document.querySelector('.submit-btn');
+  btn.textContent = '发布中...';
+  btn.style.opacity = '0.7';
+  setTimeout(() => { location.href = 'certificate.html'; }, 1000);
+}
+</script>
+</body>
+</html>

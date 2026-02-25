@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>社死排行榜</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background: #FFF5F5; font-family: 'DM Sans', -apple-system, sans-serif; min-height: 100vh; }
+    .app { max-width: 402px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* Header */
+    .header { background: #FFF5F5; padding: 48px 24px 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 50; }
+    .logo-emoji { font-size: 48px; line-height: 1; }
+    .title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 32px; font-weight: 800; color: #E11D48; }
+    .subtitle { font-size: 14px; color: #9CA3AF; }
+    .tab-row { background: #FFFFFF; border-radius: 24px; padding: 4px; display: flex; width: 100%; gap: 0; }
+    .tab { flex: 1; height: 40px; border-radius: 20px; border: none; font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: all 0.2s; background: transparent; color: #6B7280; font-weight: 500; }
+    .tab.active { background: #E11D48; color: #FFFFFF; font-weight: 600; }
+
+    /* List */
+    .list { padding: 8px 20px; display: flex; flex-direction: column; gap: 12px; flex: 1; padding-bottom: 120px; }
+
+    /* Story card */
+    .card { background: #FFFFFF; border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: transform 0.15s; text-decoration: none; color: inherit; }
+    .card:active { transform: scale(0.98); }
+    .card-head { display: flex; justify-content: space-between; align-items: center; }
+    .user-row { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 40px; height: 40px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .username { font-size: 15px; font-weight: 600; color: #1A1A1A; }
+    .user-time { font-size: 13px; color: #9CA3AF; }
+    .rank-badge { border-radius: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .rank-1 { background: #FEF3C7; color: #D97706; }
+    .rank-n { background: #F3F4F6; color: #6B7280; }
+    .story-text { font-size: 15px; color: #1A1A1A; line-height: 1.5; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; }
+    .death-score { display: flex; align-items: center; gap: 6px; }
+    .death-icon { font-size: 16px; }
+    .death-num { font-size: 13px; font-weight: 600; color: #E11D48; }
+    .actions { display: flex; align-items: center; gap: 16px; }
+    .action-item { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #6B7280; }
+
+    /* Bottom bar */
+    .bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 402px; background: #FFFFFF; border-top: 1px solid #F3F4F6; padding: 12px 24px 34px; z-index: 50; }
+    .submit-btn { width: 100%; height: 52px; border-radius: 26px; border: none; background: #E11D48; color: #FFFFFF; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo-emoji">😵</div>
+    <div class="title">社死排行榜</div>
+    <div class="subtitle">记录人类的尴尬瞬间</div>
+    <div class="tab-row">
+      <button class="tab active" onclick="switchTab(this,'hot')">🔥 热门</button>
+      <button class="tab" onclick="switchTab(this,'new')">🆕 最新</button>
+      <button class="tab" onclick="switchTab(this,'hall')">👑 名人堂</button>
+    </div>
+  </div>
+
+  <div class="list" id="list"></div>
+
+  <div class="bottom-bar">
+    <button class="submit-btn" onclick="location.href='submit.html'">
+      <span>✍️</span><span>投稿我的社死经历</span>
+    </button>
+  </div>
+</div>
+
+<script>
+const posts = [
+  { rank:1, avatar:'🙈', avatarBg:'#FCD34D', name:'社恐本恐', time:'2小时前',
+    text:'在公司厕所打电话吐槽领导，出来发现领导就站在门口洗手...', index:98, likes:'2.3k', comments:328 },
+  { rank:2, avatar:'🫣', avatarBg:'#A78BFA', name:'橘知星人', time:'5小时前',
+    text:'给暗恋对象发消息在干嘛，结果发到了班级群...', index:95, likes:'1.8k', comments:256 },
+  { rank:3, avatar:'😱', avatarBg:'#86EFAC', name:'匿名用户003', time:'8小时前',
+    text:'相亲饭局把"我很喜欢你"说成了"我是变态"，对面当场叫服务员结账...', index:91, likes:'1.5k', comments:201 },
+  { rank:4, avatar:'😭', avatarBg:'#FCA5A5', name:'打工人日记', time:'昨天',
+    text:'以为自己退群了，结果只是把群改了个名，发了条"终于离职了，这群傻X"...', index:87, likes:'1.2k', comments:178 },
+  { rank:5, avatar:'🤦', avatarBg:'#93C5FD', name:'每天都在社死', time:'2天前',
+    text:'面试时说上家公司氛围差，面试官说"我前夫确实管理有问题"...', index:83, likes:987, comments:134 },
+];
+
+function renderList(data) {
+  document.getElementById('list').innerHTML = data.map(p => `
+    <a class="card" href="detail.html">
+      <div class="card-head">
+        <div class="user-row">
+          <div class="avatar" style="background:${p.avatarBg}">${p.avatar}</div>
+          <div>
+            <div class="username">${p.name}</div>
+            <div class="user-time">${p.time}</div>
+          </div>
+        </div>
+        <div class="rank-badge ${p.rank===1?'rank-1':'rank-n'}">
+          ${p.rank===1?'🏆 ':''}#${p.rank}
+        </div>
+      </div>
+      <div class="story-text">${p.text}</div>
+      <div class="card-footer">
+        <div class="death-score">
+          <span class="death-icon">💀</span>
+          <span class="death-num">社死指数 ${p.index}/100</span>
+        </div>
+        <div class="actions">
+          <div class="action-item">😂 ${p.likes}</div>
+          <div class="action-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            ${p.comments}
+          </div>
+        </div>
+      </div>
+    </a>
+  `).join('');
+}
+
+function switchTab(el, tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const shuffled = [...posts].sort(() => Math.random()-0.5).map((p,i)=>({...p,rank:i+1}));
+  renderList(tab==='hall' ? posts.slice(0,3) : shuffled);
+}
+
+renderList(posts);
+</script>
+</body>
+</html>
