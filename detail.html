@@ -71,6 +71,21 @@
     .nav-item.active .nav-label { color: #E11D48; }
     .nav-fab { width: 46px; height: 46px; border-radius: 23px; background: #E11D48; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 12px rgba(225,29,72,0.35); margin-top: -10px; }
 
+    /* Inline certificate */
+    .cert-inline { background: linear-gradient(135deg, #1A1A1A 0%, #2D1018 100%); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 14px; border: 1px solid rgba(225,29,72,0.25); }
+    .cert-inline-head { display: flex; align-items: center; gap: 14px; }
+    .cert-inline-badge { width: 56px; height: 56px; border-radius: 28px; background: radial-gradient(circle at 35% 35%, #E11D48, #BE123C); display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; box-shadow: 0 4px 16px rgba(225,29,72,0.4); }
+    .cert-inline-title { font-size: 11px; color: #6B7280; margin-bottom: 3px; }
+    .cert-inline-level { font-family: 'Bricolage Grotesque', sans-serif; font-size: 20px; font-weight: 800; color: #E11D48; }
+    .cert-inline-stats { display: flex; gap: 0; }
+    .cert-stat { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0; }
+    .cert-stat + .cert-stat { border-left: 1px solid #2A2A2A; }
+    .cert-stat-val { font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 800; color: #FFFFFF; }
+    .cert-stat-lab { font-size: 10px; color: #6B7280; }
+    .cert-inline-cta { background: none; border: 1px solid rgba(225,29,72,0.4); border-radius: 12px; padding: 11px; color: #E11D48; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; transition: background 0.15s; }
+    .cert-inline-cta:active { background: rgba(225,29,72,0.1); }
+    .cert-inline-empty { text-align: center; padding: 4px 0; color: #6B7280; font-size: 13px; }
+
     /* Loading */
     .loading { text-align: center; padding: 60px 0; color: #9CA3AF; font-size: 14px; }
   </style>
@@ -101,7 +116,6 @@
   <div class="bottom-nav">
     <a class="nav-item" href="index.html"><span class="nav-icon">🏠</span><span class="nav-label">首页</span></a>
     <a class="nav-item" href="submit.html"><div class="nav-fab">✍️</div></a>
-    <a class="nav-item" href="certificate.html"><span class="nav-icon">🏅</span><span class="nav-label">证书</span></a>
     <a class="nav-item" href="mine.html"><span class="nav-icon">👤</span><span class="nav-label">我的</span></a>
   </div>
 </div>
@@ -123,6 +137,60 @@
     if (!post) { location.href = 'index.html'; return; }
     currentPost = post;
     render(currentPost, comments);
+    // 证书异步加载，不阻塞主内容
+    loadCert();
+  }
+
+  const CERT_LEVELS = [
+    { min: 90, icon: '🔥', label: '地狱级社死王' },
+    { min: 75, icon: '😱', label: '极高危社死大师' },
+    { min: 60, icon: '😰', label: '高危社死选手' },
+    { min: 40, icon: '😅', label: '中度社死达人' },
+    { min: 0,  icon: '🙈', label: '轻度社死新手' },
+  ];
+
+  async function loadCert() {
+    const authorId = getAuthorId();
+    const [myPosts, rank] = await Promise.all([DB.getUserPosts(authorId), DB.getUserRank(authorId)]);
+    const el = document.getElementById('certSection');
+    if (!el) return;
+
+    if (!myPosts.length) {
+      el.innerHTML = `
+        <div class="cert-inline">
+          <div class="cert-inline-empty">😶‍🌫️ 你还没有社死经历<br><span style="font-size:12px">投稿后解锁你的专属证书</span></div>
+          <a class="cert-inline-cta" href="submit.html">✍️ 去投稿，领取证书</a>
+        </div>`;
+      return;
+    }
+
+    const maxIdx = Math.max(...myPosts.map(p => p.deathIndex));
+    const lv = CERT_LEVELS.find(l => maxIdx >= l.min);
+    el.innerHTML = `
+      <div class="cert-inline">
+        <div class="cert-inline-head">
+          <div class="cert-inline-badge">${lv.icon}</div>
+          <div>
+            <div class="cert-inline-title">你的社死等级</div>
+            <div class="cert-inline-level">${lv.label}</div>
+          </div>
+        </div>
+        <div class="cert-inline-stats">
+          <div class="cert-stat">
+            <div class="cert-stat-val" style="color:#E11D48">${maxIdx}</div>
+            <div class="cert-stat-lab">最高指数</div>
+          </div>
+          <div class="cert-stat">
+            <div class="cert-stat-val">${myPosts.length}</div>
+            <div class="cert-stat-lab">故事数</div>
+          </div>
+          <div class="cert-stat">
+            <div class="cert-stat-val" style="color:#FFD700">${rank ? '#' + rank : '—'}</div>
+            <div class="cert-stat-lab">最高排名</div>
+          </div>
+        </div>
+        <a class="cert-inline-cta" href="certificate.html">🏅 查看完整证书</a>
+      </div>`;
   }
 
   function render(post, comments) {
@@ -170,12 +238,11 @@
           <span class="icon">↗️</span>
           <span class="label">分享</span>
         </button>
-        <a href="certificate.html" style="flex:1;text-decoration:none">
-          <button class="action-btn" style="width:100%">
-            <span class="icon">🏅</span>
-            <span class="label">证书</span>
-          </button>
-        </a>
+      </div>
+
+      <!-- 我的证书（内联） -->
+      <div id="certSection" style="width:100%">
+        <div style="background:#1A1A1A;border-radius:20px;padding:20px;text-align:center;color:#6B7280;font-size:13px">加载证书…</div>
       </div>
 
       <!-- Comments -->
