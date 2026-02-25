@@ -129,7 +129,7 @@
           </div>
           <div class="rank-badge ${rankClass(i+1)}">${rankLabel(i+1)}</div>
         </div>
-        <div class="story-text">${p.content}</div>
+        <div class="story-text">${escHtml(p.content)}</div>
         <div class="card-footer">
           <div class="death-score">
             <span style="font-size:15px">💀</span>

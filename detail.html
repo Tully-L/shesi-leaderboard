@@ -125,7 +125,7 @@
           </div>
           <div class="rank-badge"><span>🏆</span><span>#1 本周</span></div>
         </div>
-        <div class="story-text">${post.content}</div>
+        <div class="story-text">${escHtml(post.content)}</div>
         <div class="score-card">
           <div class="score-left">
             <div class="skull">💀</div>
@@ -173,7 +173,7 @@
             <div class="c-avatar" style="background:${commentColor(c.authorId)}">${commentEmoji(c.authorId)}</div>
             <div style="flex:1">
               <div class="c-name">社死围观者</div>
-              <div class="c-text">${c.content}</div>
+              <div class="c-text">${escHtml(c.content)}</div>
               <div class="c-meta">${timeAgo(c.createdAt)}</div>
             </div>
           </div>`).join('')}

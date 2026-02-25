@@ -154,7 +154,7 @@
           </div>
           <div class="cert-quote">
             <div class="quote-label">🏆 代表作</div>
-            <div class="quote-text">「${topPost.content.slice(0, 40)}${topPost.content.length > 40 ? '…' : ''}」</div>
+            <div class="quote-text">「${escHtml(topPost.content.slice(0, 40))}${topPost.content.length > 40 ? '…' : ''}」</div>
             <div class="quote-meta">社死指数 ${topPost.deathIndex}/100 · 获赞 ${formatNum(topPost.likes)}</div>
           </div>
           <div class="cert-date">颁发于 ${dateStr}</div>
@@ -167,7 +167,7 @@
           <div class="my-post-card">
             <div class="rank-dot ${i === 0 ? 'top' : ''}">#${i+1}</div>
             <div style="flex:1">
-              <div class="my-post-text">${p.content}</div>
+              <div class="my-post-text">${escHtml(p.content)}</div>
               <div class="my-post-score">💀 ${p.deathIndex}/100 · ${p.deathLevel}</div>
             </div>
           </div>

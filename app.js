@@ -19,13 +19,18 @@ async function getSB() {
   if (!window.supabase) {
     await new Promise((resolve, reject) => {
       const s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
       s.onload = resolve; s.onerror = reject;
       document.head.appendChild(s);
     });
   }
-  _sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+  _sb = (window.supabase || supabase).createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
   return _sb;
+}
+
+// ── HTML 转义（防止用户内容注入） ───────────────────────────
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ── 用户标识 ──────────────────────────────────────────────
