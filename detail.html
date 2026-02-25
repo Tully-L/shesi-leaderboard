@@ -16,7 +16,7 @@
     .header-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 17px; font-weight: 700; color: #1A1A1A; }
     .bookmark-btn { width: 36px; height: 36px; border-radius: 18px; background: #F9FAFB; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-    .scroll-area { flex: 1; overflow-y: auto; padding: 12px 16px 160px; display: flex; flex-direction: column; gap: 12px; }
+    .scroll-area { flex: 1; overflow-y: auto; padding: 12px 16px 200px; display: flex; flex-direction: column; gap: 12px; }
 
     /* Story card */
     .story-card { background: #FFFFFF; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -57,12 +57,19 @@
     .no-comments { text-align: center; color: #9CA3AF; font-size: 14px; padding: 20px 0; }
 
     /* Bottom input */
-    .bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 402px; background: #FFFFFF; border-top: 1px solid #F3F4F6; padding: 12px 16px env(safe-area-inset-bottom, 16px); display: flex; align-items: center; gap: 10px; z-index: 50; }
+    .bottom-bar { position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 402px; background: #FFFFFF; border-top: 1px solid #F3F4F6; padding: 12px 16px 10px; display: flex; align-items: center; gap: 10px; z-index: 50; }
     .comment-input { flex: 1; height: 44px; border-radius: 22px; background: #F6F7F8; border: 1.5px solid transparent; outline: none; padding: 0 16px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: #1A1A1A; transition: border-color 0.15s; }
     .comment-input:focus { border-color: #E11D48; background: #FFF; }
     .comment-input::placeholder { color: #9CA3AF; }
     .send-btn { width: 44px; height: 44px; border-radius: 22px; background: #E11D48; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: opacity 0.15s; box-shadow: 0 2px 8px rgba(225,29,72,0.3); }
     .send-btn:active { opacity: 0.8; }
+    /* Bottom nav */
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 402px; background: #FFFFFF; border-top: 1px solid #F3F4F6; padding: 8px 0 env(safe-area-inset-bottom, 12px); display: flex; z-index: 50; }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; padding: 4px 0; cursor: pointer; }
+    .nav-icon { font-size: 22px; line-height: 1; }
+    .nav-label { font-size: 10px; color: #9CA3AF; font-weight: 500; }
+    .nav-item.active .nav-label { color: #E11D48; }
+    .nav-fab { width: 46px; height: 46px; border-radius: 23px; background: #E11D48; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 12px rgba(225,29,72,0.35); margin-top: -10px; }
 
     /* Loading */
     .loading { text-align: center; padding: 60px 0; color: #9CA3AF; font-size: 14px; }
@@ -89,6 +96,13 @@
     <button class="send-btn" onclick="sendComment()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
     </button>
+  </div>
+
+  <div class="bottom-nav">
+    <a class="nav-item" href="index.html"><span class="nav-icon">🏠</span><span class="nav-label">首页</span></a>
+    <a class="nav-item" href="submit.html"><div class="nav-fab">✍️</div></a>
+    <a class="nav-item" href="certificate.html"><span class="nav-icon">🏅</span><span class="nav-label">证书</span></a>
+    <a class="nav-item" href="mine.html"><span class="nav-icon">👤</span><span class="nav-label">我的</span></a>
   </div>
 </div>
 

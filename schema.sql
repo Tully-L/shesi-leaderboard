@@ -35,6 +35,8 @@ create policy "posts_insert" on posts for insert with check (true);
 create policy "posts_update" on posts for update using (true);
 create policy "comments_select" on comments for select using (true);
 create policy "comments_insert" on comments for insert with check (true);
+create policy "posts_delete" on posts for delete using (true);
+create policy "comments_delete" on comments for delete using (true);
 
 -- 原子点赞函数（防并发冲突）
 create or replace function toggle_like(p_post_id uuid, p_delta integer)

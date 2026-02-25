@@ -225,6 +225,38 @@ const DB = {
     return localDB.addComment(postId, content);
   },
 
+  async deletePost(id) {
+    if (CONFIG.USE_SUPABASE) {
+      await sbFetch(`posts?id=eq.${id}&author_id=eq.${getAuthorId()}`, { method: 'DELETE' });
+    } else {
+      const posts = localDB._get().filter(p => p.id !== id);
+      localDB._save(posts);
+    }
+  },
+
+  async updatePost(id, post) {
+    if (CONFIG.USE_SUPABASE) {
+      const data = await sbFetch(`posts?id=eq.${id}&author_id=eq.${getAuthorId()}`, {
+        method: 'PATCH',
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify({
+          content: post.content,
+          tag: post.tag,
+          death_index: post.deathIndex,
+          death_level: post.deathLevel,
+          death_reason: post.deathReason,
+          anonymous: post.anonymous,
+          location: post.location || '',
+        }),
+      });
+      return mapPost(Array.isArray(data) ? data[0] : data);
+    }
+    // localDB fallback
+    const posts = localDB._get();
+    const p = posts.find(p => p.id === id);
+    if (p) { Object.assign(p, { content: post.content, tag: post.tag, deathIndex: post.deathIndex, deathLevel: post.deathLevel, deathReason: post.deathReason, anonymous: post.anonymous, location: post.location }); localDB._save(posts); return p; }
+  },
+
   // ── 用户数据 ──────────────────────────────────────────
 
   async getUserPosts(authorId) {
@@ -285,6 +317,10 @@ const localDB = {
     const posts = this._get();
     const p = posts.find(p => p.id === id);
     if (p) { p.likes = Math.max(0, p.likes + (nowLiked ? 1 : -1)); this._save(posts); }
+  },
+  async deletePost(id) {
+    const posts = this._get().filter(p => p.id !== id);
+    this._save(posts);
   },
   async getComments(postId) {
     return JSON.parse(localStorage.getItem('shesi_comments') || '[]')
