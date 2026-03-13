@@ -158,8 +158,8 @@ const DB = {
     if (CONFIG.USE_SUPABASE) {
       try {
         const data = await sbFetch(`posts?id=eq.${id}&limit=1`);
-        return data?.[0] ? mapPost(data[0]) : null;
-      } catch (e) { console.error(e); return null; }
+        if (data?.[0]) return mapPost(data[0]);
+      } catch (e) { console.error(e); }
     }
     return localDB.getPost(id);
   },
@@ -207,8 +207,8 @@ const DB = {
     if (CONFIG.USE_SUPABASE) {
       try {
         const data = await sbFetch(`comments?post_id=eq.${postId}&order=created_at.desc`);
-        return (data || []).map(mapComment);
-      } catch (e) { return []; }
+        if (data && data.length) return data.map(mapComment);
+      } catch (e) { console.error(e); }
     }
     return localDB.getComments(postId);
   },
@@ -263,8 +263,8 @@ const DB = {
     if (CONFIG.USE_SUPABASE) {
       try {
         const data = await sbFetch(`posts?author_id=eq.${authorId}&order=death_index.desc`);
-        return (data || []).map(mapPost);
-      } catch (e) { return []; }
+        if (data && data.length) return data.map(mapPost);
+      } catch (e) { console.error(e); }
     }
     return localDB.getUserPosts(authorId);
   },
@@ -273,10 +273,11 @@ const DB = {
     if (CONFIG.USE_SUPABASE) {
       try {
         const data = await sbFetch('posts?select=author_id,death_index&order=death_index.desc');
-        if (!data) return null;
-        const idx = data.findIndex(p => p.author_id === authorId);
-        return idx === -1 ? null : idx + 1;
-      } catch (e) { return null; }
+        if (data) {
+          const idx = data.findIndex(p => p.author_id === authorId);
+          if (idx !== -1) return idx + 1;
+        }
+      } catch (e) { console.error(e); }
     }
     return localDB.getUserRank(authorId);
   },
